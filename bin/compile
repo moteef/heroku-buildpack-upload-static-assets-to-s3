@@ -2,17 +2,25 @@
 # bin/compile <build-dir> <cache-dir> <env-dir>
 
 ### Configure environment
+if [[ -z "$ASSET_PATH" ]]; then
+    echo "-----> Skipping uploading assets to S3"
+    exit 0
+fi
 
-set -o errexit    # always exit on error
-set -o pipefail   # don't ignore exit codes when piping output
-set -o nounset    # fail on unset variables
-unset GIT_DIR     # Avoid GIT_DIR leak from previous build steps
+set -o errexit  # always exit on error
+set -o pipefail # don't ignore exit codes when piping output
+set -o nounset  # fail on unset variables
+unset GIT_DIR   # Avoid GIT_DIR leak from previous build steps
 
 ### Configure directories
 BUILD_DIR=${1:-}
 CACHE_DIR=${2:-}
 ENV_DIR=${3:-}
-BP_DIR=$(cd $(dirname ${0:-}); cd ..; pwd)
+BP_DIR=$(
+    cd $(dirname ${0:-})
+    cd ..
+    pwd
+)
 LOG_FILE='/tmp/node-build-log.txt'
 
 ### Load dependencies
@@ -22,7 +30,7 @@ source ${BP_DIR}/lib/output.sh
 npm install | output "$LOG_FILE"
 
 BUILD_DIR=${BUILD_DIR} \
-CACHE_DIR=${CACHE_DIR} \
-ENV_DIR=${ENV_DIR} \
-SOURCE_VERSION=${SOURCE_VERSION} \
-node ${BP_DIR}/lib/upload.js | output "$LOG_FILE"
+    CACHE_DIR=${CACHE_DIR} \
+    ENV_DIR=${ENV_DIR} \
+    SOURCE_VERSION=${SOURCE_VERSION} \
+    node ${BP_DIR}/lib/upload.js | output "$LOG_FILE"
