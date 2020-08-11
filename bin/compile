@@ -21,6 +21,13 @@ BP_DIR=$(
     cd ..
     pwd
 )
+
+if [ -f $BUILD_DIR/.asset_path ]; then
+  echo "-----> Assets already uploaded to S3"
+  echo "-----> Skipping uploading assets to S3"
+  exit 0
+fi
+
 LOG_FILE='/tmp/node-build-log.txt'
 
 ### Load dependencies
